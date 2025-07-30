@@ -46,6 +46,21 @@ st.markdown("""
         font-weight: 700 !important;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
     }
+            
+    @media screen and (max-width: 600px) {
+    .main-header h1 {
+        font-size: 2rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .main-header p {
+        font-size: 1rem !important;
+    }
+
+    .main-header {
+        padding: 1rem !important;
+    }
+}
     
     .main-header p {
         font-size: 1.3rem !important;
@@ -129,8 +144,8 @@ def calculate_eco_score(footprint):
     return max(0, 100 - footprint / 100)
 
 st.markdown("""
-<div class="main-header" >
-    <h1 style="text-align: center;">🌍 Carbon Coach</h1>
+<div class="main-header" style="text-align: center;">
+    <h1>🌍 Carbon Coach</h1>
     <p style="font-size: 1.2rem; margin: 0;">Discover your carbon footprint and get personalized climate tips</p>
     <p style="font-size: 1rem; opacity: 0.9; margin: 0.5rem 0 0 0;">Powered by IBM Watson ML 🚀</p>
 </div>
