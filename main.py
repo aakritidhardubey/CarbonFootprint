@@ -129,7 +129,7 @@ def calculate_eco_score(footprint):
     return max(0, 100 - footprint / 100)
 
 st.markdown("""
-<div class="main-header" style="text-align: center;">
+<div class="main-header" style="display: flex; justify-content: center; align-items: center; text-align: center;">
     <h1>🌍 Carbon Coach</h1>
     <p style="font-size: 1.2rem; margin: 0;">Discover your carbon footprint and get personalized climate tips</p>
     <p style="font-size: 1rem; opacity: 0.9; margin: 0.5rem 0 0 0;">Powered by IBM Watson ML 🚀</p>
