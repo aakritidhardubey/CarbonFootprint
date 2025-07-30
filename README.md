@@ -53,8 +53,8 @@ Copy code
 pip install -r requirements.txt
 ```
 ### 3️⃣ Create .env file with your IBM credentials
-<pre> ```ini # .env file API_KEY=your_ibm_cloud_api_key 
-DEPLOYMENT_URL=your_ibm_model_deployment_url ``` </pre>
+<pre>  .env file API_KEY=your_ibm_cloud_api_key 
+DEPLOYMENT_URL=your_ibm_model_deployment_url </pre>
 ### 4️⃣ Run the app using Streamlit
 ```bash
 Copy code
