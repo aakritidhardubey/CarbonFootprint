@@ -59,7 +59,7 @@ st.markdown("""
 
     .main-header {
         padding: 1rem !important;
-    }
+            }
 }
     
     .main-header p {
