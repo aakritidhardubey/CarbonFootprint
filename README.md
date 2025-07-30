@@ -29,15 +29,15 @@ An intelligent web app that predicts your **annual carbon footprint (in kg CO₂
 ---
 
 ## 📂 Project Structure
-
+<pre>
+```bash
 carbon_calci/
 │
 ├── main.py # Streamlit app
 ├── .env # Stores API key and URL securely
 ├── requirements.txt # Python dependencies
 ├── README.md # Project documentation
-└── assets/ # (Optional) images/icons used
-
+``` </pre>
 ---
 
 ## 🚀 How to Run the App Locally
@@ -53,7 +53,7 @@ Copy code
 pip install -r requirements.txt
 ```
 ### 3️⃣ Create .env file with your IBM credentials
-<pre>  .env file API_KEY=your_ibm_cloud_api_key 
+<pre> API_KEY=your_ibm_cloud_api_key 
 DEPLOYMENT_URL=your_ibm_model_deployment_url </pre>
 ### 4️⃣ Run the app using Streamlit
 ```bash
