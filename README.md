@@ -30,14 +30,13 @@ An intelligent web app that predicts your **annual carbon footprint (in kg CO₂
 
 ## 📂 Project Structure
 <pre>
-```bash
 carbon_calci/
 │
 ├── main.py # Streamlit app
 ├── .env # Stores API key and URL securely
 ├── requirements.txt # Python dependencies
-├── README.md # Project documentation
-``` </pre>
+└──  README.md # Project documentation
+ </pre>
 ---
 
 ## 🚀 How to Run the App Locally
