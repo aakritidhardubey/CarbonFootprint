@@ -139,9 +139,6 @@ st.markdown("""
 if "page" not in st.session_state:
     st.session_state.page = "form"
 
-# if 'show_results' not in st.session_state:
-#     st.session_state.show_results = False
-
 if  st.session_state.page=="form":
     st.markdown('<div class="form-container">', unsafe_allow_html=True)
 
@@ -272,6 +269,11 @@ if  st.session_state.page=="form":
 
 
 elif st.session_state.page =="resultP":
+    st.markdown("""
+    <script>
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    </script>
+""", unsafe_allow_html=True)
     result = st.session_state.result
     distance = st.session_state.distance
     grocery = st.session_state.grocery
