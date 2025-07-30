@@ -269,12 +269,12 @@ if  st.session_state.page=="form":
 
 
 elif st.session_state.page =="resultP":
+    result = st.session_state.result
     st.markdown("""
     <script>
         window.scrollTo({top: 0, behavior: 'smooth'});
     </script>
 """, unsafe_allow_html=True)
-    result = st.session_state.result
     distance = st.session_state.distance
     grocery = st.session_state.grocery
     tv_hours = st.session_state.tv_hours
