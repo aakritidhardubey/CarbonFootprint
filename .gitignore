@@ -1,2 +1,6 @@
-venv/
+# ────────────────────────────────────────────────────────
+# Ignore my environment file (contains secrets/API keys)
+
 .env
+venv/
+
