@@ -310,7 +310,7 @@ elif st.session_state.page =="resultP":
     """, unsafe_allow_html=True)
 
     EXCELLENT_THRESHOLD = 3000
-    AVERAGE_THRESHOLD = 7000
+    AVERAGE_THRESHOLD = 5000
 
     if result < EXCELLENT_THRESHOLD:
         tip = "✅ Excellent! You're a climate hero. Keep it up!"
