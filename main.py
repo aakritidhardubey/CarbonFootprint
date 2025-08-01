@@ -132,19 +132,13 @@ def get_ibm_token(api_key):
         return None
 
 
-def calculate_pie_chart_data(distance, grocery, tv_hours, bag_count,flight,diet):
+def calculate_pie_chart_data(distance, grocery, tv_hours, bag_count):
     transport = distance * 0.21 * 12  
     food = grocery * 0.002 * 12        
     energy = tv_hours * 0.5 * 365     
-    waste = bag_count * 2.5 * 52  
-    flights= flight * 0.25    
-    diet_emissions = {
-    "Meat-heavy": 2.5,
-    "Mixed": 2.0,
-    "Vegetarian": 1.7,
-    "Vegan": 1.5
-    }[diet]
-    return [transport, food, energy, waste,flights,diet_emissions]
+    waste = bag_count * 2.5 * 52      
+    
+    return [transport, food, energy, waste]
 
 def calculate_eco_score(footprint):
     return max(0, 100 - footprint / 100)
@@ -279,8 +273,6 @@ if  st.session_state.page=="form":
                 st.session_state.grocery = grocery
                 st.session_state.tv_hours = tv_hours
                 st.session_state.bag_count = bag_count
-                st.session_state.flights=flights
-                st.session_state.diet=diet
                 st.session_state.page ="resultP"
                 st.rerun()
 
@@ -306,8 +298,6 @@ elif st.session_state.page =="resultP":
     grocery = st.session_state.grocery
     tv_hours = st.session_state.tv_hours
     bag_count = st.session_state.bag_count
-    flights=st.session_state.flights
-    diet=st.session_state.diet
     
     st.markdown('<div class="results-container">', unsafe_allow_html=True)
     
@@ -351,12 +341,12 @@ elif st.session_state.page =="resultP":
         st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         st.markdown("### 🥧 Footprint Breakdown")
         
-        labels = ['Transport', 'Food', 'Energy', 'Waste','Flights','Diet']
-        data = calculate_pie_chart_data(distance, grocery, tv_hours, bag_count,flights,diet)
+        labels = ['Transport', 'Food', 'Energy', 'Waste']
+        data = calculate_pie_chart_data(distance, grocery, tv_hours, bag_count)
         
         if sum(data) > 0:
             fig, ax = plt.subplots(figsize=(8, 6))
-            colors = ["#FA3B3B", "#6391EC", "#58D6F3", "#93F0C5","#F6CBC7","#F9D289"]
+            colors = ["#FA3B3B", "#6391EC", "#58D6F3", "#93F0C5"]
             wedges, texts, autotexts = ax.pie(data, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
             
             for autotext in autotexts:
