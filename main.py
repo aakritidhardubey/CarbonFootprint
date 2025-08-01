@@ -131,17 +131,124 @@ def get_ibm_token(api_key):
         st.error("Invalid API key")
         return None
 
+def calculate_detailed_footprint(inputs):
+    body_type, sex, diet, shower, heating, transport, vehicle, social, grocery, flights, distance, bag_size, bag_count, tv_hours, clothes, internet, energy_eff, recycling, cooking = inputs
+    # Initialize footprint components
+    footprint = {
+        'transportation': 0,
+        'food': 0,
+        'energy': 0,
+        'waste': 0,
+        'clothing': 0,
+        'travel': 0
+    }
+    # TRANSPORTATION CALCULATION 
+    transport_factors = {
+        'Car': {'Petrol': 2.3, 'Diesel': 2.7, 'Electric': 0.5, 'None': 0},
+        'Public Transport': {'Petrol': 0.6, 'Diesel': 0.8, 'Electric': 0.2, 'None': 0.4},
+        'Cycle': {'Petrol': 0, 'Diesel': 0, 'Electric': 0, 'None': 0},
+        'Walk': {'Petrol': 0, 'Diesel': 0, 'Electric': 0, 'None': 0}
+    }
+    if transport in transport_factors and vehicle in transport_factors[transport]:
+        emission_factor = transport_factors[transport][vehicle]
+        footprint['transportation'] = distance * emission_factor * 12  # Annual
+    # FOOD CALCULATION 
+    diet_factors = {'Vegan': 0.8, 'Vegetarian': 1.2, 'Meat Eater': 2.0}
+    body_factors = {'Thin': 0.9, 'Average': 1.0, 'Overweight': 1.2}
+    base_food_emissions = grocery * 0.003 
+    diet_multiplier = diet_factors.get(diet, 1.0)
+    body_multiplier = body_factors.get(body_type, 1.0)
+    footprint['food'] = base_food_emissions * diet_multiplier * body_multiplier * 12
+    # ENERGY CALCULATION 
+    # TV/PC usage
+    tv_emissions = tv_hours * 0.6 * 365  
+    # Internet usage
+    internet_emissions = internet * 0.2 * 365  
+    # Heating energy
+    heating_factors = {'Electricity': 1.2, 'Gas': 0.8, 'Wood': 0.3, 'None': 0}
+    heating_emissions = heating_factors.get(heating, 0) * 500 
+    # Cooking energy
+    cooking_factors = {'Gas': 300, 'Electric': 450} 
+    cooking_emissions = cooking_factors.get(cooking, 0)
+    # Energy efficiency bonus
+    efficiency_factor = 0.8 if energy_eff == 'Yes' else 1.0
+    total_energy = (tv_emissions + internet_emissions + heating_emissions + cooking_emissions) * efficiency_factor
+    footprint['energy'] = total_energy
+    # WASTE CALCULATION (improved)
+    bag_size_factors = {'Small': 8, 'Medium': 15, 'Large': 25}
+    recycling_factor = 0.7 if recycling == 'Yes' else 1.0
+    bag_weight = bag_size_factors.get(bag_size, 15)
+    annual_waste = bag_count * bag_weight * 52  
+    footprint['waste'] = annual_waste * 0.5 * recycling_factor
+    # CLOTHING CALCULATION
+    footprint['clothing'] = clothes * 10 * 12 
+    # AIR TRAVEL CALCULATION
+    flight_factors = {'Never': 0, 'Rarely': 500, 'Often': 2000}
+    footprint['travel'] = flight_factors.get(flights, 0)
+    # SOCIAL ACTIVITY IMPACT
+    social_factors = {'Low': 0.9, 'Medium': 1.0, 'High': 1.3}
+    social_multiplier = social_factors.get(social, 1.0)
+    # Apply social multiplier to discretionary categories
+    footprint['clothing'] *= social_multiplier
+    footprint['travel'] *= social_multiplier
+    # SHOWER FREQUENCY IMPACT 
+    shower_factors = {'Daily': 1.2, 'Few Times a Week': 1.0, 'Rarely': 0.7}
+    shower_multiplier = shower_factors.get(shower, 1.0)
+    footprint['energy'] *= shower_multiplier
+    return footprint
 
-def calculate_pie_chart_data(distance, grocery, tv_hours, bag_count):
-    transport = distance * 0.21 * 12  
-    food = grocery * 0.002 * 12        
-    energy = tv_hours * 0.5 * 365     
-    waste = bag_count * 2.5 * 52      
+def calculate_eco_score(total_footprint):
+    if total_footprint <= 1500:  # Excellent
+        return 95 + (1500 - total_footprint) / 30
+    elif total_footprint <= 3000:  # Good
+        return 75 + (3000 - total_footprint) / 75
+    elif total_footprint <= 5000:  # Average
+        return 50 + (5000 - total_footprint) / 80
+    elif total_footprint <= 8000:  # Poor
+        return 25 + (8000 - total_footprint) / 120
+    else:  # Very Poor
+        return max(0, 25 - (total_footprint - 8000) / 200)
+
+def calculate_simple_pie_chart_data(detailed_footprint):
+    transport = detailed_footprint.get('transportation', 0) + detailed_footprint.get('travel', 0)
+    food = detailed_footprint.get('food', 0)
+    energy = detailed_footprint.get('energy', 0)
+    waste = detailed_footprint.get('waste', 0) + detailed_footprint.get('clothing', 0)
     
     return [transport, food, energy, waste]
 
-def calculate_eco_score(footprint):
-    return max(0, 100 - footprint / 100)
+def create_simple_pie_chart(chart_data):
+    labels = ['Transport', 'Food', 'Energy', 'Waste']
+    colors = ["#FA3B3B", "#6391EC", "#58D6F3", "#93F0C5"]
+    filtered_labels = []
+    filtered_data = []
+    filtered_colors = []
+    
+    for i, value in enumerate(chart_data):
+        if value > 0:
+            filtered_labels.append(labels[i])
+            filtered_data.append(value)
+            filtered_colors.append(colors[i])
+    if not filtered_data:
+        return None
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+    wedges, texts, autotexts = ax.pie(
+        filtered_data, 
+        labels=filtered_labels, 
+        autopct='%1.1f%%', 
+        startangle=90, 
+        colors=filtered_colors
+    )
+    # Styling the percentage text
+    for autotext in autotexts:
+        autotext.set_color('white')
+        autotext.set_fontweight('bold')
+        autotext.set_fontsize(10)
+    
+    ax.set_title('Your Carbon Footprint by Category', fontsize=14, fontweight='bold', pad=20)
+    return fig
+
 
 st.markdown("""
 <div class="main-header" style="text-align: center;">
@@ -187,14 +294,14 @@ if  st.session_state.page=="form":
                 internet = st.number_input("Internet Hours per Day", 0, 24, 6)
                 
                 st.markdown("**🛍️ Consumption**")
-                grocery = st.number_input("Monthly Grocery Bill (₹)", 100, 50000, 5000)
+                grocery = st.number_input("Monthly Grocery Bill (₹)", 100, 50000, 3000)
                 clothes = st.number_input("New Clothes per Month", 0, 100, 5)
 
             with col3:
                 st.markdown("**🚗 Transportation**")
                 transport = st.selectbox("Transport Type", ["Car", "Public Transport", "Cycle", "Walk"])
-                vehicle = st.selectbox("Vehicle Type", ["None", "Petrol", "Diesel", "Electric"])
-                distance = st.number_input("Monthly Vehicle Distance (km)", 0, 10000, 500)
+                vehicle = st.selectbox("Vehicle Type", [ "Petrol", "Diesel", "Electric","None"])
+                distance = st.number_input("Monthly Vehicle Distance (km)", 0, 10000, 300)
                 flights = st.selectbox("Air Travel Frequency", ["Never", "Rarely", "Often"])
                 
                 st.markdown("**🗑️ Waste**")
@@ -268,11 +375,14 @@ if  st.session_state.page=="form":
                     st.error("Invalid prediction result received")
                     st.stop()
 
+                inputs = [body_type, sex, diet, shower, heating, transport, vehicle,
+                         social, grocery, flights, distance, bag_size, bag_count,
+                         tv_hours, clothes, internet, energy_eff, recycling, cooking]
+                
+                detailed_footprint = calculate_detailed_footprint(inputs)
+
                 st.session_state.result = result
-                st.session_state.distance = distance
-                st.session_state.grocery = grocery
-                st.session_state.tv_hours = tv_hours
-                st.session_state.bag_count = bag_count
+                st.session_state.detailed_footprint = detailed_footprint
                 st.session_state.page ="resultP"
                 st.rerun()
 
@@ -289,18 +399,13 @@ if  st.session_state.page=="form":
 
 elif st.session_state.page =="resultP":
     result = st.session_state.result
+    detailed_footprint = st.session_state.detailed_footprint
     st.markdown("""
     <script>
         window.scrollTo({top: 0, behavior: 'smooth'});
     </script>
 """, unsafe_allow_html=True)
-    distance = st.session_state.distance
-    grocery = st.session_state.grocery
-    tv_hours = st.session_state.tv_hours
-    bag_count = st.session_state.bag_count
-    
     st.markdown('<div class="results-container">', unsafe_allow_html=True)
-    
     st.markdown(f"""
     <div style="text-align: center; padding: 2rem; background: white; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
         <h2 style="color: #2E8B57; margin-bottom: 1rem;">🌱 Your Carbon Footprint Results</h2>
@@ -308,6 +413,15 @@ elif st.session_state.page =="resultP":
         <p style="color: #666; font-size: 1.2rem;">per year</p>
     </div>
     """, unsafe_allow_html=True)
+    max_category = max(detailed_footprint.items(), key=lambda x: x[1])
+    category_tips = {
+        'transportation': "🚗 Try carpooling, public transport, or electric vehicles to reduce transportation emissions.",
+        'food': "🥗 Consider reducing meat consumption and buying local produce to lower food emissions.",
+        'energy': "💡 Switch to LED bulbs, use energy-efficient appliances, and reduce screen time.",
+        'waste': "♻️ Increase recycling, composting, and buy products with less packaging.",
+        'clothing': "👕 Buy fewer clothes, choose sustainable brands, and donate old items.",
+        'travel': "✈️ Reduce air travel frequency or consider carbon offsetting for flights."
+    }
 
     EXCELLENT_THRESHOLD = 3000
     AVERAGE_THRESHOLD = 5000
@@ -341,22 +455,13 @@ elif st.session_state.page =="resultP":
         st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         st.markdown("### 🥧 Footprint Breakdown")
         
-        labels = ['Transport', 'Food', 'Energy', 'Waste']
-        data = calculate_pie_chart_data(distance, grocery, tv_hours, bag_count)
-        
-        if sum(data) > 0:
-            fig, ax = plt.subplots(figsize=(8, 6))
-            colors = ["#FA3B3B", "#6391EC", "#58D6F3", "#93F0C5"]
-            wedges, texts, autotexts = ax.pie(data, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
-            
-            for autotext in autotexts:
-                autotext.set_color('white')
-                autotext.set_fontweight('bold')
-                autotext.set_fontsize(10)
-            
-            ax.set_title('Your Carbon Footprint by Category', fontsize=14, fontweight='bold', pad=20)
-            st.pyplot(fig)
-            plt.close(fig)
+        chart_data = calculate_simple_pie_chart_data(detailed_footprint)
+        if sum(chart_data) > 0:
+            fig = create_simple_pie_chart(chart_data)
+            if fig:
+                st.pyplot(fig)
+                plt.close(fig)
+
         else:
             st.info("No significant emissions detected in breakdown categories.")
         
